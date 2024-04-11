@@ -14,6 +14,16 @@ const logReq = (req, res, next) => {
 
 app.use(logReq);
 
+const validaId = (req, res, next) => {
+  const { id } = req.params;
+
+  if (!id || isNaN(id)) {
+    return res.status(400).json({ erro: "ID inválido." });
+  }
+
+  next();
+};
+
 let produtos = [];
 
 app.post("/produtos", (req, res) => {
@@ -23,13 +33,9 @@ app.post("/produtos", (req, res) => {
     return res.status(400).json({ erro: "Nome e preço são obrigatórios." });
   }
 
-  if (
-    typeof nome !== "string" ||
-    typeof preco !== "number" ||
-    typeof descricao !== "string"
-  ) {
+  if (typeof nome !== "string" || typeof preco !== "number" || typeof descricao !== "string") {
     return res.status(400).json({
-        erro: "Nome e descrição precisam ser letras. Preço precisa ser um número.",
+        erro: "Nome e descrição precisam ser strings. Preço precisa ser um número.",
       });
   }
 
@@ -53,7 +59,7 @@ app.get("/produtos", (req, res) => {
   res.json(produtos);
 });
 
-app.put("/produtos/:id", (req, res) => {
+app.put("/produtos/:id", validaId, (req, res) => {
   const { id } = req.params;
   const { nome, preco, descricao } = req.body;
 
@@ -62,12 +68,11 @@ app.put("/produtos/:id", (req, res) => {
   );
 
   if (produtoIndex === -1) {
-    res.status(404).send("Produto não encontrado.");
+    res.status(404).json({ erro: "Produto não encontrado." });
     return;
   }
 
-  if (!nome || !preco) {
-    return res.status(400).json({ 
+  if (!nome || !preco) { return res.status(400).json({ 
       erro: "Nome, preco e descrição são obrigatórios."
     });
   }
@@ -82,7 +87,7 @@ app.put("/produtos/:id", (req, res) => {
   });
 });
 
-app.delete("/produtos/:id", (req, res) => {
+app.delete("/produtos/:id", validaId, (req, res) => {
   const { id } = req.params;
 
   const index = produtos.findIndex((p) => p.id === parseInt(id));
@@ -92,7 +97,7 @@ app.delete("/produtos/:id", (req, res) => {
   }
 
   produtos.splice(index, 1);
-  res.json({ mensagem: "Produto removido com sucesso!", produto: produtos });
+  res.json({ mensagem: "Produto removido com sucesso!"});
 });
 
 app.listen(PORT, () => {
