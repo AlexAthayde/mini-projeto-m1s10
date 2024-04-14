@@ -20,7 +20,6 @@ const validaId = (req, res, next) => {
   if (!id || isNaN(id)) {
     return res.status(400).json({ erro: "ID inválido." });
   }
-
   next();
 };
 
@@ -63,34 +62,30 @@ app.put("/produtos/:id", validaId, (req, res) => {
   const { id } = req.params;
   const { nome, preco, descricao } = req.body;
 
-  const produtoIndex = produtos.findIndex(
-    (produto) => produto.id === Number.parseInt(id)
-  );
+  const index = produtos.findIndex((produto) => produto.id === parseInt(id));
 
-  if (produtoIndex === -1) {
+  if (index === -1) {
     res.status(404).json({ erro: "Produto não encontrado." });
     return;
   }
 
   if (!nome || !preco) { return res.status(400).json({ 
-      erro: "Nome, preco e descrição são obrigatórios."
+      erro: "Nome e preço são obrigatórios."
     });
   }
 
-  produtos[produtoIndex].nome = nome;
-  produtos[produtoIndex].preco = preco;
-  produtos[produtoIndex].descricao = descricao;
+  produtos[index].nome = nome;
+  produtos[index].preco = preco;
+  produtos[index].descricao = descricao;
 
-  res.json({
-    mensagem: "Produto atualizado com sucesso!",
-    produto: produtos[produtoIndex],
+  res.json({ mensagem: "Produto atualizado com sucesso!",produto: produtos[index],
   });
 });
 
 app.delete("/produtos/:id", validaId, (req, res) => {
   const { id } = req.params;
 
-  const index = produtos.findIndex((p) => p.id === parseInt(id));
+  const index = produtos.findIndex((produto) => produto.id === parseInt(id));
 
   if (index === -1) {
     return res.status(404).json({ erro: "Produto não encontrado." });
